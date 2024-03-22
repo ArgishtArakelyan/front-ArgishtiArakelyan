@@ -145,7 +145,11 @@ const FetchDataComponent = () => {
               onClick={() => handleItemClick(item)}
             >
               <div className="img">
-                <img src={item.img} alt="" />
+                <img
+                  srcSet={`${item.img} 768px, ${item.img_2x} 992px`}
+                  src={item.img}
+                  alt="My Image"
+                />
               </div>
               <div className="tags">{item.tags}</div>
               <div className="title">{item.title}</div>
