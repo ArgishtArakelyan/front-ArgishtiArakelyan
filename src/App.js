@@ -7,9 +7,11 @@ import "./App.scss";
 const FetchDataComponent = () => {
   const [data, setData] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [filteredData, setFilteredData] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
   const handleItemClick = (item) => {
     setSelectedItem(item);
     setShowPopup(true);
@@ -18,6 +20,22 @@ const FetchDataComponent = () => {
   const handleSearchInputChange = (e) => {
     setSearchQuery(e.target.value);
   };
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const handleScroll = () => {
+    const scrollPosition = window.scrollY;
+    setIsSticky(scrollPosition > 200);
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   const Popup = ({ item }) => (
     <div className="popup">
@@ -48,33 +66,38 @@ const FetchDataComponent = () => {
     fetchData();
   }, []);
 
-  const filteredData = data
-    ? data.filter(
-        (item) =>
-          item.tags.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.autor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.date.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.views.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.text.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : [];
+  useEffect(() => {
+    const filteredData = data
+      ? data.filter(
+          (item) =>
+            item.tags.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.autor.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.date.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.views.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.text.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : [];
+    setFilteredData(filteredData);
+  }, [data, searchQuery]);
 
   return (
     <div>
-      <header className="App-header">
-        <div className="header-wrap">
+      <header className={`App-header ${menuOpen ? "open" : ""}`}>
+        <div className={`header-wrap ${isSticky ? "padding-b" : ""}`}>
           <div className="logo-wrap">
-            <div className="menuBurgerBtn"></div>
+            <div className="menuBurgerBtn" onClick={toggleMenu}></div>
             <img src={logo} alt="logo" />
           </div>
 
-          <nav>
+          <nav className={isSticky ? "sticky" : ""}>
             <ul className="menu-wrap">
-              <li className="menu-item">Demos</li>
+              <li className="menu-item">
+                <span>Demos</span>
+              </li>
 
               <li className="menu-item drop-t-open">
-                Post
+                <span>Post</span>
                 <ul className="dropdown-m">
                   <li>Post Header</li>
                   <li>Post Layout</li>
@@ -83,14 +106,21 @@ const FetchDataComponent = () => {
                   <li>Video Post</li>
                 </ul>
               </li>
-              <li className="menu-item">Features</li>
-              <li className="menu-item">Categories</li>
-              <li className="menu-item">Shop</li>
-              <li className="menu-item">Buy Now</li>
+              <li className="menu-item">
+                <span>Features</span>
+              </li>
+              <li className="menu-item">
+                <span>Categories</span>
+              </li>
+              <li className="menu-item">
+                <span>Shop</span>
+              </li>
+              <li className="menu-item">
+                <span>Buy Now</span>
+              </li>
             </ul>
           </nav>
         </div>
-
         <div className="search-wrap">
           <div className="icon">
             <img src={searchIcon} alt="search" />
@@ -103,6 +133,7 @@ const FetchDataComponent = () => {
             />
           </div>
         </div>
+        <div className="overlay" onClick={toggleMenu}></div>
       </header>
 
       {filteredData.length > 0 ? (
